@@ -11,16 +11,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { copyToClipboard } from '@/lib/utils';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { PhantomWalletName } from '@solana/wallet-adapter-wallets';
 import { CopyIcon, UnplugIcon } from 'lucide-react';
-import { useEffect } from 'react';
 
 export function UserProfile() {
-  const { connected, connecting, select, connect, publicKey, disconnect } = useWallet();
-
-  useEffect(() => {
-    select(PhantomWalletName);
-  }, [select]);
+  const { connected, connecting, connect, publicKey, disconnect } = useWallet();
 
   if (connected && publicKey) {
     return (

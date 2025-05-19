@@ -1,5 +1,5 @@
-import ClientLayout from '@/app/ClientLayout';
-import ClientProivders from '@/app/ClientProviders';
+import ClientLayout from '@/app/client-layout';
+import ClientProivders from '@/app/client-providers';
 import { META_THEME_COLORS } from '@/config/site';
 import type { Metadata } from 'next';
 import './globals.css';

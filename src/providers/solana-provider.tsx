@@ -1,6 +1,6 @@
 'use client';
 
-import { BaseWalletAdapter, WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import '@solana/wallet-adapter-react-ui/styles.css';
@@ -17,11 +17,9 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
 
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
-  const wallets: BaseWalletAdapter[] = useMemo(() => [new PhantomWalletAdapter()], []);
-
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets}>
+      <WalletProvider wallets={[new PhantomWalletAdapter()]}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
