@@ -1,5 +1,6 @@
 'use client';
 
+import { SolanaProvider } from '@/providers/solana-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -13,7 +14,9 @@ export default function ClientProivders({
 }>) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <SolanaProvider>{children}</SolanaProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
