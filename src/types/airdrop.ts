@@ -1,3 +1,5 @@
+import { ClaimStatusJSON } from '@streamflow/distributor/solana';
+
 export enum Chain {
   SOLANA = 'SOLANA',
   APTOS = 'APTOS',
@@ -35,3 +37,11 @@ export type ClaimantMetaData = {
   amountClaimed: string;
   proof: number[][];
 };
+
+// export type ClosedStatus = {
+//   amountUnlocked: string;
+//   amountLocked: string;
+//   proof: number[][];
+// };
+
+export type UserClaimStatus = { status: 'OPEN'; data: ClaimStatusJSON } | { status: 'CLOSED' };

@@ -4,12 +4,22 @@ import { IAirdrop } from '@/hooks/use-airdrops';
 import { useUserClaimStatus } from '@/hooks/use-user-claim-status';
 import { copyToClipboard, formatTimestamp, getClaimableAmount } from '@/lib/utils';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { clusterApiUrl } from '@solana/web3.js';
+import { SolanaDistributorClient } from '@streamflow/distributor/solana';
 import { BN } from 'bn.js';
 import { Copy } from 'lucide-react';
+import { useCallback } from 'react';
 
 export const UserClaimStatus = ({ airdrop }: { airdrop: IAirdrop }) => {
   const { connected, publicKey } = useWallet();
   const { userMetaData, claimStatus, isLoading } = useUserClaimStatus(airdrop.pubkey.toString(), publicKey?.toString());
+
+  const handleClaim = useCallback(async () => {
+    const distributorClient = new SolanaDistributorClient({ clusterUrl: clusterApiUrl('devnet') });
+
+    console.log(distributorClient);
+    // await distributorClient.claim();
+  }, []);
 
   if (!connected || !publicKey)
     return <div className="mt-10 text-center text-lg font-medium">Connect your wallet to view airdrop details.</div>;
@@ -17,6 +27,9 @@ export const UserClaimStatus = ({ airdrop }: { airdrop: IAirdrop }) => {
   if (isLoading) return <div className="mt-10 text-center text-lg font-medium">Loading...</div>;
 
   if (!userMetaData) return <div className="mt-10 text-center text-lg font-medium">Not eligible for airdrop</div>;
+
+  if (claimStatus?.status === 'CLOSED')
+    return <div className="mt-10 text-center text-lg font-medium">Not eligible for airdrop</div>;
 
   // const amountLocked = new BN(userData.amountLocked);
   const amountTotal = new BN(userMetaData.amountLocked).add(new BN(userMetaData.amountUnlocked));
@@ -57,10 +70,10 @@ export const UserClaimStatus = ({ airdrop }: { airdrop: IAirdrop }) => {
             View
           </a>
         </div>
-        <div>{formatTimestamp(claimStatus?.lastClaimTs, 'yyyy-MM-dd HH:mm:ss')}</div>
-        <div>{claimStatus?.lockedAmountWithdrawn}</div>
+        <div>{formatTimestamp(claimStatus?.data['lastClaimTs'], 'yyyy-MM-dd HH:mm:ss')}</div>
+        <div>{claimStatus?.data?.lockedAmountWithdrawn}</div>
         <div>
-          {claimStatus?.claimsCount && claimStatus?.claimsCount > 0 ? (
+          {claimStatus?.data.claimsCount && claimStatus?.data.claimsCount > 0 ? (
             <Badge variant="secondary">Claimed</Badge>
           ) : (
             <Badge variant="secondary">Unclaimed</Badge>
@@ -68,7 +81,7 @@ export const UserClaimStatus = ({ airdrop }: { airdrop: IAirdrop }) => {
         </div>
         <div>
           {claimable.gt(new BN(0)) && (
-            <Button size="sm" variant="default">
+            <Button size="sm" variant="default" onClick={() => handleClaim()}>
               Claim
             </Button>
           )}

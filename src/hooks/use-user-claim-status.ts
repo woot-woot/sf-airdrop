@@ -1,6 +1,5 @@
 import { fetchClaimantMetadata, fetchUserClaimStatus } from '@/services/airdrop';
-import { ClaimantMetaData } from '@/types/airdrop';
-import { ClaimStatusJSON } from '@streamflow/distributor/solana';
+import { ClaimantMetaData, UserClaimStatus } from '@/types/airdrop';
 import { useQuery } from '@tanstack/react-query';
 
 export const useUserClaimStatus = (airdropPubkey: string | undefined, walletAddress: string | undefined) => {
@@ -8,7 +7,7 @@ export const useUserClaimStatus = (airdropPubkey: string | undefined, walletAddr
     data: claimStatus,
     isLoading: loadingClaimStatus,
     error: claimStatusError,
-  } = useQuery<ClaimStatusJSON | null>({
+  } = useQuery<UserClaimStatus | null>({
     queryKey: ['user-claim-status', airdropPubkey, walletAddress],
     queryFn: () => fetchUserClaimStatus(airdropPubkey!, walletAddress!),
     enabled: !!airdropPubkey && !!walletAddress,

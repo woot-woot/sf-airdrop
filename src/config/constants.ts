@@ -5,6 +5,7 @@ export const SOLANA_RPC = 'https://api.devnet.solana.com';
 
 export const STREAMFLOW_DISTRIBUTOR_DATA_SIZE = 344;
 export const STREAMFLOW_CLAIMSTATUS_DATA_SIZE = 152;
+export const STREAMFLOW_CLOSEDCLAIM_DATA_SIZE = 9;
 
 export const META_THEME_COLORS = {
   light: '#ffffff',

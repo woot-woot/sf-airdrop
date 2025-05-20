@@ -1,8 +1,8 @@
-import { SOLANA_RPC, STREAMFLOW_CLAIMSTATUS_DATA_SIZE, STREAMFLOW_PROGRAM_ID } from '@/config/constants';
+import { SOLANA_RPC, STREAMFLOW_CLOSEDCLAIM_DATA_SIZE, STREAMFLOW_PROGRAM_ID } from '@/config/constants';
 import { IAirdrop } from '@/hooks/use-airdrops';
-import { AirdropMetadata, ClaimantMetaData } from '@/types/airdrop';
+import { AirdropMetadata, ClaimantMetaData, UserClaimStatus } from '@/types/airdrop';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { ClaimStatus, ClaimStatusJSON, getClaimantStatusPda, MerkleDistributor } from '@streamflow/distributor/solana';
+import { ClaimStatus, getClaimantStatusPda, MerkleDistributor } from '@streamflow/distributor/solana';
 import axios from 'axios';
 
 export const fetchAirdrop = async (airdropPubkey: string): Promise<IAirdrop | null> => {
@@ -72,7 +72,7 @@ export const fetchClaimantMetadata = async (
 export const fetchUserClaimStatus = async (
   airdropPubkey: string,
   walletAddress: string,
-): Promise<ClaimStatusJSON | null> => {
+): Promise<UserClaimStatus | null> => {
   try {
     const distributor = new PublicKey(airdropPubkey);
     const claimant = new PublicKey(walletAddress);
@@ -82,9 +82,13 @@ export const fetchUserClaimStatus = async (
     const claimStatusPda = await getClaimantStatusPda(STREAMFLOW_PROGRAM_ID, distributor, claimant);
     const claimRawData = await connection.getAccountInfo(claimStatusPda);
 
-    if (claimRawData === null || claimRawData.data.byteLength !== STREAMFLOW_CLAIMSTATUS_DATA_SIZE) return null;
+    if (claimRawData === null) return null;
 
-    return ClaimStatus.decode(claimRawData.data).toJSON();
+    if (claimRawData.data.byteLength === STREAMFLOW_CLOSEDCLAIM_DATA_SIZE) {
+      return { status: 'CLOSED' };
+    }
+
+    return { status: 'OPEN', data: ClaimStatus.decode(claimRawData.data).toJSON() };
   } catch (error) {
     console.error('fetchUserClaimStatus -> failed', error);
     return null;
