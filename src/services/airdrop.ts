@@ -1,6 +1,6 @@
 import { SOLANA_RPC, STREAMFLOW_CLOSEDCLAIM_DATA_SIZE, STREAMFLOW_PROGRAM_ID } from '@/config/constants';
 import { IAirdrop } from '@/hooks/use-airdrops';
-import { AirdropMetadata, ClaimantMetaData, UserClaimStatus } from '@/types/airdrop';
+import { AirdropMetadata, ClaimantMetaData, ClaimStatusType, UserClaimStatus } from '@/types/airdrop';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ClaimStatus, getClaimantStatusPda, MerkleDistributor } from '@streamflow/distributor/solana';
 import axios from 'axios';
@@ -85,10 +85,10 @@ export const fetchUserClaimStatus = async (
     if (claimRawData === null) return null;
 
     if (claimRawData.data.byteLength === STREAMFLOW_CLOSEDCLAIM_DATA_SIZE) {
-      return { status: 'CLOSED' };
+      return { status: ClaimStatusType.CLOSED };
     }
 
-    return { status: 'OPEN', data: ClaimStatus.decode(claimRawData.data).toJSON() };
+    return { status: ClaimStatusType.OPEN, data: ClaimStatus.decode(claimRawData.data).toJSON() };
   } catch (error) {
     console.error('fetchUserClaimStatus -> failed', error);
     return null;

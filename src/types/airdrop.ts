@@ -38,10 +38,10 @@ export type ClaimantMetaData = {
   proof: number[][];
 };
 
-// export type ClosedStatus = {
-//   amountUnlocked: string;
-//   amountLocked: string;
-//   proof: number[][];
-// };
-
-export type UserClaimStatus = { status: 'OPEN'; data: ClaimStatusJSON } | { status: 'CLOSED' };
+export enum ClaimStatusType {
+  OPEN = 'OPEN',
+  CLOSED = 'CLOSED',
+}
+export type UserClaimStatus =
+  | { status: ClaimStatusType.OPEN; data: ClaimStatusJSON }
+  | { status: ClaimStatusType.CLOSED };
