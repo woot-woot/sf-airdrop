@@ -17,11 +17,13 @@ export function AirdropRow({ airdrop }: { airdrop: IAirdrop }) {
   }, [tokenInfo, isLoading]);
 
   const totalClaimCell = useMemo(() => {
-    if (isLoading || !tokenInfo) return <Skeleton className="h-4 w-32" />;
+    if (isLoading) return <Skeleton className="h-4 w-32" />;
+    const decimals = tokenInfo?.decimals || 9;
+
     return (
       <>
-        {formatBNWithDecimals(new BN(airdrop.distributor.totalAmountClaimed), tokenInfo.decimals)}/
-        {formatBNWithDecimals(new BN(airdrop.distributor.maxTotalClaim), tokenInfo.decimals)}
+        {formatBNWithDecimals(new BN(airdrop.distributor.totalAmountClaimed), decimals)}/
+        {formatBNWithDecimals(new BN(airdrop.distributor.maxTotalClaim), decimals)}
       </>
     );
   }, [airdrop, tokenInfo, isLoading]);
