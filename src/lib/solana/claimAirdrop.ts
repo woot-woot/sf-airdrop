@@ -32,6 +32,7 @@ export async function claimAirdrop({ airdropId, userMetaData, wallet }: ClaimPar
   };
 
   return await distributorClient.claim(claimData, {
-    invoker: wallet,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    invoker: wallet as any,
   });
 }
