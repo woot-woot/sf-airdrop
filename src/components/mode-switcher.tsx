@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
-import { META_THEME_COLORS } from '@/config/site';
+import { META_THEME_COLORS } from '@/config/constants';
 import { useMetaColor } from '@/hooks/use-meta-color';
 
 export function ModeSwitcher() {

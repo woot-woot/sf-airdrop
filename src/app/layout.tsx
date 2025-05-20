@@ -1,6 +1,6 @@
 import ClientLayout from '@/app/client-layout';
 import ClientProivders from '@/app/client-providers';
-import { META_THEME_COLORS } from '@/config/site';
+import { META_THEME_COLORS } from '@/config/constants';
 import type { Metadata } from 'next';
 import './globals.css';
 
