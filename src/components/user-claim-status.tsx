@@ -3,13 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { IAirdrop } from '@/hooks/use-airdrops';
 import { useUserClaimStatus } from '@/hooks/use-user-claim-status';
+import { claimAirdrop } from '@/lib/solana/claimAirdrop';
 import { copyToClipboard, formatTimestamp, getClaimableAmount } from '@/lib/utils';
 import { ClaimStatusType } from '@/types/airdrop';
 import { SignerWalletAdapter } from '@solana/wallet-adapter-base';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { clusterApiUrl } from '@solana/web3.js';
-import { ICluster } from '@streamflow/common';
-import { IClaimData, SolanaDistributorClient } from '@streamflow/distributor/solana';
 import BN from 'bn.js';
 import { Copy } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
@@ -23,22 +21,13 @@ export const UserClaimStatus = ({ airdrop }: { airdrop: IAirdrop }) => {
   const handleClaim = useCallback(async () => {
     setIsClaiming(true);
     try {
-      if (!userMetaData || !userMetaData.amountLocked || !userMetaData.amountUnlocked || !userMetaData.proof) return;
+      if (!wallet?.adapter) throw new Error('Wallet not connected');
+      if (!userMetaData) throw new Error('User not eligible');
 
-      const distributorClient = new SolanaDistributorClient({
-        clusterUrl: clusterApiUrl('devnet'),
-        cluster: ICluster.Devnet,
-      });
-
-      const claimData: IClaimData = {
-        id: airdrop.pubkey.toBase58(),
-        amountLocked: new BN(userMetaData?.amountLocked),
-        amountUnlocked: new BN(userMetaData?.amountUnlocked),
-        proof: userMetaData?.proof,
-      };
-
-      const txResult = await distributorClient.claim(claimData, {
-        invoker: wallet?.adapter as SignerWalletAdapter,
+      const txResult = await claimAirdrop({
+        airdropId: airdrop.pubkey.toBase58(),
+        userMetaData,
+        wallet: wallet.adapter as SignerWalletAdapter,
       });
 
       if (!txResult) {
