@@ -8,13 +8,14 @@ import axios from 'axios';
 export const fetchAirdrop = async (airdropPubkey: string): Promise<IAirdrop | null> => {
   try {
     const pubkey = new PublicKey(airdropPubkey);
-    const data = await MerkleDistributor.fetch(new Connection(SOLANA_RPC), pubkey, STREAMFLOW_PROGRAM_ID);
 
-    if (!data) return null;
+    const connection = new Connection(SOLANA_RPC);
 
-    return { distributor: data.toJSON(), pubkey };
-  } catch (error) {
-    console.error('fetchAirdrop -> failed', error);
+    const distributorRawData = await connection.getAccountInfo(new PublicKey(airdropPubkey));
+    if (!distributorRawData) return null;
+
+    return { distributor: MerkleDistributor.decode(distributorRawData.data).toJSON(), pubkey };
+  } catch {
     return null;
   }
 };
