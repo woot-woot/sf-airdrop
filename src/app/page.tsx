@@ -39,6 +39,7 @@ export default function Home() {
         <TableCaption>A list of recent airdrops</TableCaption>
         <TableHeader>
           <TableRow>
+            <TableHead>Token</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Number of recipients (claimed/total)</TableHead>
             <TableHead>Amount in tokens (claimed/Total)</TableHead>

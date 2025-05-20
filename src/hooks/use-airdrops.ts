@@ -17,7 +17,8 @@ const fetchAirdrops = async (): Promise<IAirdrop[]> => {
   });
 
   return accounts.map((account) => {
-    return { distributor: MerkleDistributor.decode(account.account.data).toJSON(), pubkey: account.pubkey };
+    const decoded = MerkleDistributor.decode(account.account.data).toJSON();
+    return { distributor: decoded, pubkey: account.pubkey };
   });
 };
 

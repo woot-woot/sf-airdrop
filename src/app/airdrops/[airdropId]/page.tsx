@@ -5,12 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UserClaimStatus } from '@/components/user-claim-status';
 import { useAirdropDetails } from '@/hooks/use-airdrop-details';
+import { useTokenInfo } from '@/hooks/use-token-info';
+import { formatBNWithDecimals } from '@/lib/utils';
+import BN from 'bn.js';
 import { useParams } from 'next/navigation';
 
 export default function AirdropDetail() {
   const { airdropId } = useParams();
 
   const { airdrop, metadata, isLoading } = useAirdropDetails(airdropId as string);
+  const { data: tokenInfo } = useTokenInfo(airdrop?.distributor.mint);
 
   if (isLoading) {
     return (
@@ -22,6 +26,8 @@ export default function AirdropDetail() {
   }
 
   if (!airdrop || !metadata) return <div className="mt-10 text-center text-lg font-medium">Airdrop not found.</div>;
+
+  const decimals = tokenInfo?.decimals || 9;
 
   return (
     <div className="max-w-5xl mx-auto mt-10 space-y-6">
@@ -58,10 +64,13 @@ export default function AirdropDetail() {
         <InfoCard desc="Claimed" value={`${airdrop.distributor.numNodesClaimed}/${airdrop.distributor.maxNumNodes}`} />
         <InfoCard
           desc="Amount Claimed / Total"
-          value={`${airdrop.distributor.totalAmountClaimed}/${airdrop.distributor.maxTotalClaim}`}
+          value={`${formatBNWithDecimals(
+            new BN(airdrop.distributor.totalAmountClaimed),
+            decimals,
+          )}/${formatBNWithDecimals(new BN(airdrop.distributor.maxTotalClaim), decimals)}`}
         />
       </div>
-      <UserClaimStatus airdrop={airdrop} />
+      <UserClaimStatus airdrop={airdrop} tokenInfo={tokenInfo} />
     </div>
   );
 }

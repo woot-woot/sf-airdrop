@@ -11,6 +11,7 @@ export const fetchAirdrop = async (airdropPubkey: string): Promise<IAirdrop | nu
     const data = await MerkleDistributor.fetch(new Connection(SOLANA_RPC), pubkey, STREAMFLOW_PROGRAM_ID);
 
     if (!data) return null;
+
     return { distributor: data.toJSON(), pubkey };
   } catch (error) {
     console.error('fetchAirdrop -> failed', error);

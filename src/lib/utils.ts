@@ -61,3 +61,18 @@ export function getClaimableAmount(
 
   return totalAmount.mul(claimableSteps).div(totalSteps);
 }
+
+export function formatBNWithDecimals(bnValue: BN, decimals: number) {
+  const base = new BN(10).pow(new BN(decimals)); // 10^decimals
+  const whole = bnValue.div(base).toString(10); // integer part
+  const fractionBN = bnValue.mod(base);
+
+  // Pad fraction with leading zeros
+  let fractionStr = fractionBN.toString(10).padStart(decimals, '0');
+
+  // Remove trailing zeros for neatness
+  fractionStr = fractionStr.replace(/0+$/, '');
+
+  if (fractionStr === '') return whole;
+  return `${whole}.${fractionStr}`;
+}

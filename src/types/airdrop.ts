@@ -45,3 +45,15 @@ export enum ClaimStatusType {
 export type UserClaimStatus =
   | { status: ClaimStatusType.OPEN; data: ClaimStatusJSON }
   | { status: ClaimStatusType.CLOSED };
+
+export type TokenInfo = {
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  supply: string;
+  uri: string | null;
+  image: string | null;
+};
+
+export type TokenInfoResponse = Record<string, TokenInfo>;

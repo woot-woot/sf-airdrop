@@ -4,8 +4,8 @@ import { Spinner } from '@/components/ui/spinner';
 import { IAirdrop } from '@/hooks/use-airdrops';
 import { useUserClaimStatus } from '@/hooks/use-user-claim-status';
 import { claimAirdrop } from '@/lib/solana/claimAirdrop';
-import { copyToClipboard, formatTimestamp, getClaimableAmount } from '@/lib/utils';
-import { ClaimStatusType } from '@/types/airdrop';
+import { copyToClipboard, formatBNWithDecimals, formatTimestamp, getClaimableAmount } from '@/lib/utils';
+import { ClaimStatusType, TokenInfo } from '@/types/airdrop';
 import { SignerWalletAdapter } from '@solana/wallet-adapter-base';
 import { useWallet } from '@solana/wallet-adapter-react';
 import BN from 'bn.js';
@@ -13,7 +13,13 @@ import { Copy } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-export const UserClaimStatus = ({ airdrop }: { airdrop: IAirdrop }) => {
+export const UserClaimStatus = ({
+  airdrop,
+  tokenInfo,
+}: {
+  airdrop: IAirdrop;
+  tokenInfo: TokenInfo | null | undefined;
+}) => {
   const { connected, publicKey, wallet } = useWallet();
   const { userMetaData, claimStatus, isLoading } = useUserClaimStatus(airdrop.pubkey.toString(), publicKey?.toString());
   const [isClaiming, setIsClaiming] = useState<boolean>(false);
@@ -65,6 +71,8 @@ export const UserClaimStatus = ({ airdrop }: { airdrop: IAirdrop }) => {
   if (claimStatus?.status === ClaimStatusType.CLOSED)
     return <div className="mt-10 text-center text-lg font-medium">Not eligible for airdrop</div>;
 
+  const decimals = tokenInfo?.decimals || 9;
+
   return (
     <div className="border rounded-xl p-4 bg-background shadow">
       <div className="grid grid-cols-7 gap-4 text-sm text-muted-foreground font-semibold mb-2">
@@ -78,7 +86,7 @@ export const UserClaimStatus = ({ airdrop }: { airdrop: IAirdrop }) => {
       </div>
 
       <div className="grid grid-cols-7 gap-4 items-center text-sm">
-        <div>{amountTotal.toString()}</div>
+        <div>{formatBNWithDecimals(amountTotal, decimals)}</div>
         <div className="flex items-center gap-2">
           {publicKey.toBase58().slice(0, 6)}...{publicKey.toBase58().slice(-4)}
           <Button size="icon" variant="ghost" onClick={() => copyToClipboard(publicKey.toBase58())}>
@@ -97,7 +105,8 @@ export const UserClaimStatus = ({ airdrop }: { airdrop: IAirdrop }) => {
         </div>
         <div>{formatTimestamp(claimStatus?.data.lastClaimTs, 'yyyy-MM-dd HH:mm:ss')}</div>
         <div>
-          {claimStatus?.data?.lockedAmountWithdrawn}/{amountTotal.toString()}
+          {formatBNWithDecimals(new BN(claimStatus?.data?.lockedAmountWithdrawn || '0'), decimals)}/
+          {formatBNWithDecimals(amountTotal, decimals)}
         </div>
         <div>
           {claimStatus?.data.claimsCount && claimStatus?.data.claimsCount > 0 ? (
