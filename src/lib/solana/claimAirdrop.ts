@@ -6,7 +6,7 @@ import BN from 'bn.js';
 
 interface ClaimParams {
   airdropId: string;
-  userMetaData: {
+  claimantMeta: {
     amountLocked: string;
     amountUnlocked: string;
     proof: number[][];
@@ -14,8 +14,8 @@ interface ClaimParams {
   wallet: SignerWalletAdapter;
 }
 
-export async function claimAirdrop({ airdropId, userMetaData, wallet }: ClaimParams) {
-  if (!userMetaData?.amountLocked || !userMetaData?.amountUnlocked || !userMetaData?.proof) {
+export async function claimAirdrop({ airdropId, claimantMeta, wallet }: ClaimParams) {
+  if (!claimantMeta?.amountLocked || !claimantMeta?.amountUnlocked || !claimantMeta?.proof) {
     throw new Error('Invalid user metadata');
   }
 
@@ -26,9 +26,9 @@ export async function claimAirdrop({ airdropId, userMetaData, wallet }: ClaimPar
 
   const claimData: IClaimData = {
     id: airdropId,
-    amountLocked: new BN(userMetaData.amountLocked),
-    amountUnlocked: new BN(userMetaData.amountUnlocked),
-    proof: userMetaData.proof,
+    amountLocked: new BN(claimantMeta.amountLocked),
+    amountUnlocked: new BN(claimantMeta.amountUnlocked),
+    proof: claimantMeta.proof,
   };
 
   return await distributorClient.claim(claimData, {

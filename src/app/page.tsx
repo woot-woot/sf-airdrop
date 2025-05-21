@@ -2,7 +2,7 @@
 
 import { AirdropRow } from '@/components/airdrop-row';
 import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Spinner } from '@/components/ui/spinner';
 import { IAirdrop, useAirdrops } from '@/hooks/use-airdrops';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useMemo, useState } from 'react';
@@ -11,47 +11,49 @@ export default function Home() {
   const { connected } = useWallet();
 
   const airdrops = useAirdrops();
+
   const [filter, setFilter] = useState('');
 
   const filteredAirdrops = useMemo(() => {
-    return (
-      airdrops.data?.filter((airdrop: IAirdrop) =>
-        airdrop.pubkey.toString().toLowerCase().includes(filter.toLowerCase()),
-      ) ?? []
-    );
-  }, [airdrops.data, filter]);
+    const filtered = airdrops.data
+      ?.filter((airdrop: IAirdrop) => airdrop.pubkey.toString().toLowerCase().includes(filter.toLowerCase()))
+      .sort((a, b) => Number(b.distributor.startTs) - Number(a.distributor.startTs));
 
-  if (!connected) return <h1 className="text-lg font-semibold text-center mt-4">Connect to see airdrops!</h1>;
-  if (airdrops.isLoading) return <h1 className="text-lg font-semibold text-center mt-4">Loading ...</h1>;
+    if (connected) return filtered || [];
+
+    return filtered?.slice(0, 50) || [];
+  }, [airdrops.data, filter, connected]);
+
+  if (airdrops.isLoading) return <Spinner />;
   if (airdrops.isError)
     return <h1 className="text-lg font-semibold text-red-500 text-center mt-4">Failed to load airdrops.</h1>;
   if (!airdrops.data?.length) return <h1 className="text-lg font-semibold text-center mt-4">No airdrops</h1>;
 
   return (
-    <>
+    <div>
+      <h1 className="text-xl font-semibold text-center my-4">
+        {connected ? 'User Airdrops' : 'Recently created airdrops'}{' '}
+      </h1>
       <Input
         placeholder="Filter by Airdrop ID"
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
-        className="w-full md:w-1/2 mb-2"
+        className="w-full md:w-1/2 mb-4"
       />
-      <Table>
-        <TableCaption>A list of recent airdrops</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Token</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Number of recipients (claimed/total)</TableHead>
-            <TableHead>Amount in tokens (claimed/Total)</TableHead>
-            <TableHead>Logged-in user amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredAirdrops.map((airdrop: IAirdrop) => {
-            return <AirdropRow airdrop={airdrop} key={airdrop.pubkey.toString()} />;
-          })}
-        </TableBody>
-      </Table>
-    </>
+
+      <div className="grid grid-cols-7 gap-4 text-sm text-muted-foreground font-semibold mb-2">
+        <div>Name</div>
+        <div>Token</div>
+        <div>Type</div>
+        <div>No.Recipients</div>
+        <div>Amount In Tokens</div>
+        <div>User amount</div>
+        <div />
+      </div>
+
+      {filteredAirdrops.map((airdrop: IAirdrop) => {
+        return <AirdropRow airdrop={airdrop} key={airdrop.pubkey.toString()} />;
+      })}
+    </div>
   );
 }

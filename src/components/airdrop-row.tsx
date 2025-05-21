@@ -1,42 +1,96 @@
-import { Skeleton } from '@/components/ui/skeleton';
-import { TableCell, TableRow } from '@/components/ui/table';
+import { ClaimButton } from '@/components/claim-button';
+import { useAirdropMeta } from '@/hooks/use-airdrop-meta';
 import { IAirdrop } from '@/hooks/use-airdrops';
+import { useClaimStatus } from '@/hooks/use-claim-status';
+import { useClaimantMeta } from '@/hooks/use-claimant-meta';
 import { useTokenInfo } from '@/hooks/use-token-info';
-import { formatBNWithDecimals } from '@/lib/utils';
+import { cn, formatBNWithDecimals, getClaimableAmount } from '@/lib/utils';
+import { AirdropType, ClaimStatusType } from '@/types/airdrop';
+import { useWallet } from '@solana/wallet-adapter-react';
 import BN from 'bn.js';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 
-export function AirdropRow({ airdrop }: { airdrop: IAirdrop }) {
+type AirdropRowProps = {
+  airdrop: IAirdrop;
+};
+
+export function AirdropRow({ airdrop }: AirdropRowProps) {
   const router = useRouter();
-  const { data: tokenInfo, isLoading } = useTokenInfo(airdrop.distributor.mint);
 
-  const symbolCell = useMemo(() => {
-    if (isLoading) return <Skeleton className="h-4 w-16" />;
-    return tokenInfo?.symbol ?? <div>---</div>;
-  }, [tokenInfo, isLoading]);
+  const { connected, publicKey: userPubKey } = useWallet();
 
-  const totalClaimCell = useMemo(() => {
-    if (isLoading) return <Skeleton className="h-4 w-32" />;
-    const decimals = tokenInfo?.decimals || 9;
+  const { data: tokenInfo, isLoading: loadingTokenInfo } = useTokenInfo(airdrop.distributor.mint);
+  const { data: airdropMeta, isLoading: loadingAirdropMeta } = useAirdropMeta(airdrop.pubkey.toString());
+  const { data: claimantMeta, isLoading: loadingClaimantMeta } = useClaimantMeta(
+    airdrop.pubkey.toString(),
+    userPubKey?.toString(),
+  );
 
-    return (
-      <>
-        {formatBNWithDecimals(new BN(airdrop.distributor.totalAmountClaimed), decimals)}/
-        {formatBNWithDecimals(new BN(airdrop.distributor.maxTotalClaim), decimals)}
-      </>
-    );
-  }, [airdrop, tokenInfo, isLoading]);
+  const {
+    data: claimStatus,
+    isLoading: loadingClaimStatus,
+    refetch: refetchClaimStatus,
+  } = useClaimStatus(airdrop.pubkey.toString(), userPubKey?.toString(), claimantMeta);
+
+  const isLoading =
+    loadingTokenInfo || loadingAirdropMeta || (connected && loadingClaimantMeta) || (connected && loadingClaimStatus);
+
+  const amountTotal = useMemo(() => {
+    if (!claimantMeta) return new BN(0);
+
+    return new BN(claimantMeta.amountLocked).add(new BN(claimantMeta.amountUnlocked));
+  }, [claimantMeta]);
+
+  const vested = getClaimableAmount(
+    amountTotal.toString(),
+    airdrop.distributor.startTs,
+    airdrop.distributor.endTs,
+    airdrop.distributor.unlockPeriod,
+  );
+
+  if (
+    !tokenInfo ||
+    !airdropMeta ||
+    (connected && !claimantMeta) ||
+    (connected && claimStatus?.status === ClaimStatusType.CLOSED) ||
+    isLoading
+  )
+    return null;
+
+  const claimable =
+    claimStatus?.status === ClaimStatusType.OPEN ? vested.sub(new BN(claimStatus.data.lockedAmountWithdrawn)) : vested;
 
   return (
-    <TableRow className="cursor-pointer" onClick={() => router.push(`/airdrops/${airdrop.pubkey.toString()}`)}>
-      <TableCell>{symbolCell}</TableCell>
-      <TableCell>{airdrop.distributor.startTs === airdrop.distributor.endTs ? 'Instant' : 'Vested'}</TableCell>
-      <TableCell>
+    <div
+      className={cn(
+        'grid grid-cols-7 gap-4 items-center text-sm cursor-pointer',
+        'px-2 py-4 hover:bg-muted border-b border-dashed',
+      )}
+      onClick={() => router.push(`/airdrops/${airdrop.pubkey.toString()}`)}
+    >
+      <div className="truncate whitespace-nowrap overflow-hidden">{airdropMeta.name}</div>
+      <div>{tokenInfo.symbol}</div>
+      <div>{airdrop.distributor.startTs === airdrop.distributor.endTs ? AirdropType.INSTANT : AirdropType.VESTED}</div>
+      <div>
         {airdrop.distributor.numNodesClaimed}/{airdrop.distributor.maxNumNodes}
-      </TableCell>
-      <TableCell>{totalClaimCell}</TableCell>
-      <TableCell />
-    </TableRow>
+      </div>
+      <div>
+        {formatBNWithDecimals(new BN(airdrop.distributor.totalAmountClaimed), tokenInfo.decimals)}/
+        {formatBNWithDecimals(new BN(airdrop.distributor.maxTotalClaim), tokenInfo.decimals)}
+      </div>
+      <div>
+        {formatBNWithDecimals(vested, tokenInfo.decimals)}/{formatBNWithDecimals(amountTotal, tokenInfo.decimals)}
+      </div>
+      {!claimable.isZero() && (
+        <div>
+          <ClaimButton
+            claimantMeta={claimantMeta}
+            refetchClaimStatus={() => refetchClaimStatus()}
+            airdropPk={airdrop.pubkey}
+          />
+        </div>
+      )}
+    </div>
   );
 }

@@ -1,5 +1,10 @@
 import { ClaimStatusJSON } from '@streamflow/distributor/solana';
 
+export enum AirdropType {
+  INSTANT = 'Instant',
+  VESTED = 'Vested',
+}
+
 export enum Chain {
   SOLANA = 'SOLANA',
   APTOS = 'APTOS',
@@ -51,9 +56,7 @@ export type TokenInfo = {
   name: string;
   symbol: string;
   decimals: number;
-  supply: string;
-  uri: string | null;
-  image: string | null;
+  image?: string;
 };
 
 export type TokenInfoResponse = Record<string, TokenInfo>;

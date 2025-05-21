@@ -3,20 +3,22 @@
 import { InfoCard } from '@/components/info-card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { UserClaimStatus } from '@/components/user-claim-status';
-import { useAirdropDetails } from '@/hooks/use-airdrop-details';
+import { useAirdropDetail } from '@/hooks/use-airdrop-detail';
+import { useAirdropMeta } from '@/hooks/use-airdrop-meta';
 import { useTokenInfo } from '@/hooks/use-token-info';
 import { formatBNWithDecimals } from '@/lib/utils';
 import BN from 'bn.js';
 import { useParams } from 'next/navigation';
+import { ClaimStatus } from './claim-status';
 
 export default function AirdropDetail() {
   const { airdropId } = useParams();
 
-  const { airdrop, metadata, isLoading } = useAirdropDetails(airdropId as string);
-  const { data: tokenInfo } = useTokenInfo(airdrop?.distributor.mint);
+  const { data: airdrop, isLoading: loadingAirdrop } = useAirdropDetail(airdropId as string);
+  const { data: metadata, isLoading: loadingAirdropMeta } = useAirdropMeta(airdropId as string);
+  const { data: tokenInfo, isLoading: loadingTokenInfo } = useTokenInfo(airdrop?.distributor.mint);
 
-  if (isLoading) {
+  if (loadingAirdrop || loadingAirdropMeta || loadingTokenInfo) {
     return (
       <div className="max-w-5xl mx-auto mt-10 space-y-4">
         <Skeleton className="h-12 w-full rounded-xl" />
@@ -70,7 +72,7 @@ export default function AirdropDetail() {
           )}/${formatBNWithDecimals(new BN(airdrop.distributor.maxTotalClaim), decimals)}`}
         />
       </div>
-      <UserClaimStatus airdrop={airdrop} tokenInfo={tokenInfo} />
+      <ClaimStatus airdrop={airdrop} tokenInfo={tokenInfo} />
     </div>
   );
 }
