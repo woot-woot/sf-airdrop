@@ -5,6 +5,8 @@ import { useConnection } from '@solana/wallet-adapter-react';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { useQuery } from '@tanstack/react-query';
 
+import { TokenMetadata } from '@solana/spl-token-metadata';
+
 function getMetadataPDA(mint: PublicKey): PublicKey {
   return PublicKey.findProgramAddressSync(
     [Buffer.from('metadata'), METADATA_PROGRAM_ID.toBuffer(), mint.toBuffer()],
@@ -12,15 +14,36 @@ function getMetadataPDA(mint: PublicKey): PublicKey {
   )[0];
 }
 
+async function getTokenMetadata(connection: Connection, mint: PublicKey): Promise<TokenMetadata | null> {
+  try {
+    const metadataPDA = getMetadataPDA(mint);
+    const accountInfo = await connection.getAccountInfo(metadataPDA);
+
+    if (!accountInfo) {
+      return null;
+    }
+
+    // console.log(unpack(accountInfo.data));
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 const fetchTokenInfo = async (connection: Connection, mint: string): Promise<TokenInfo | null> => {
-  const mintPk = new PublicKey(mint);
+  try {
+    const mintPk = new PublicKey(mint);
 
-  const mintInfo = await getMint(connection, mintPk);
-  const decimals = mintInfo.decimals;
+    const mintInfo = await getMint(connection, mintPk);
+    const decimals = mintInfo.decimals;
 
-  console.log(getMetadataPDA(mintPk));
+    const metadata = await getTokenMetadata(connection, mintPk);
 
-  return { decimals, address: mint, symbol: 'TOKEN', name: 'TOKEN' };
+    return { decimals, address: mint, symbol: metadata?.symbol || 'Unknown', name: metadata?.name || 'Unknown' };
+  } catch {
+    return null;
+  }
 };
 
 export const useTokenInfo = (mint: string | undefined) => {

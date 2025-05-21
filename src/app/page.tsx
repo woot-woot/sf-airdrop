@@ -41,9 +41,9 @@ export default function Home() {
         className="w-full md:w-1/2 mb-4"
       />
 
-      <div className="grid grid-cols-7 gap-4 text-sm text-muted-foreground font-semibold mb-2">
+      <div className="px-2 grid grid-cols-6 gap-4 text-sm text-muted-foreground font-semibold mb-2">
         <div>Name</div>
-        <div>Token</div>
+        {/* <div>Token</div> */}
         <div>Type</div>
         <div>No.Recipients</div>
         <div>Amount In Tokens</div>

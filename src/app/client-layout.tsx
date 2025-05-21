@@ -26,7 +26,7 @@ export default function ClientLayout({
       <AppHeader />
       <div className="container-wrapper flex-1 min-h-full flex">
         <div className="container flex-1 min-h-full min-w-full">
-          <div className="w-full md:w-5/7 mx-auto">{content}</div>
+          <div className="w-full md:w-8/10 mx-auto">{content}</div>
         </div>
       </div>
       <Toaster />

@@ -64,13 +64,13 @@ export function AirdropRow({ airdrop }: AirdropRowProps) {
   return (
     <div
       className={cn(
-        'grid grid-cols-7 gap-4 items-center text-sm cursor-pointer',
+        'grid grid-cols-6 gap-4 items-center text-sm cursor-pointer',
         'px-2 py-4 hover:bg-muted border-b border-dashed',
       )}
       onClick={() => router.push(`/airdrops/${airdrop.pubkey.toString()}`)}
     >
       <div className="truncate whitespace-nowrap overflow-hidden">{airdropMeta.name}</div>
-      <div>{tokenInfo.symbol}</div>
+      {/* <div>{tokenInfo.symbol}</div> */}
       <div>{airdrop.distributor.startTs === airdrop.distributor.endTs ? AirdropType.INSTANT : AirdropType.VESTED}</div>
       <div>
         {airdrop.distributor.numNodesClaimed}/{airdrop.distributor.maxNumNodes}
