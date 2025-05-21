@@ -8,7 +8,7 @@ import { cn, formatBNWithDecimals, getClaimableAmount } from '@/lib/utils';
 import { AirdropType, ClaimStatusType } from '@/types/airdrop';
 import { useWallet } from '@solana/wallet-adapter-react';
 import BN from 'bn.js';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useMemo } from 'react';
 
 type AirdropRowProps = {
@@ -16,8 +16,6 @@ type AirdropRowProps = {
 };
 
 export function AirdropRow({ airdrop }: AirdropRowProps) {
-  const router = useRouter();
-
   const { connected, publicKey: userPubKey } = useWallet();
 
   const { data: tokenInfo, isLoading: loadingTokenInfo } = useTokenInfo(airdrop.distributor.mint);
@@ -62,12 +60,12 @@ export function AirdropRow({ airdrop }: AirdropRowProps) {
     claimStatus?.status === ClaimStatusType.OPEN ? vested.sub(new BN(claimStatus.data.lockedAmountWithdrawn)) : vested;
 
   return (
-    <div
+    <Link
+      href={`/airdrops/${airdrop.pubkey.toString()}`}
       className={cn(
         'grid grid-cols-6 gap-4 items-center text-sm cursor-pointer',
         'px-2 py-4 hover:bg-muted border-b border-dashed',
       )}
-      onClick={() => router.push(`/airdrops/${airdrop.pubkey.toString()}`)}
     >
       <div className="truncate whitespace-nowrap overflow-hidden">{airdropMeta.name}</div>
       {/* <div>{tokenInfo.symbol}</div> */}
@@ -91,6 +89,6 @@ export function AirdropRow({ airdrop }: AirdropRowProps) {
           />
         </div>
       )}
-    </div>
+    </Link>
   );
 }
