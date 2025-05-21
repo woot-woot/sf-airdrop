@@ -81,7 +81,7 @@ export function AirdropRow({ airdrop }: AirdropRowProps) {
         {formatBNWithDecimals(vested, tokenInfo.decimals)}/{formatBNWithDecimals(amountTotal, tokenInfo.decimals)}
       </div>
       {!claimable.isZero() && (
-        <div>
+        <div onClick={(e) => e.stopPropagation()}>
           <ClaimButton
             claimantMeta={claimantMeta}
             refetchClaimStatus={() => refetchClaimStatus()}
