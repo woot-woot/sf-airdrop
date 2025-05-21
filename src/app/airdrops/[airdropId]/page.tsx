@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAirdropDetail } from '@/hooks/use-airdrop-detail';
 import { useAirdropMeta } from '@/hooks/use-airdrop-meta';
 import { useTokenInfo } from '@/hooks/use-token-info';
-import { formatBNWithDecimals } from '@/lib/utils';
+import { copyToClipboard, formatBNWithDecimals } from '@/lib/utils';
 import BN from 'bn.js';
 import { useParams } from 'next/navigation';
 import { ClaimStatus } from './claim-status';
@@ -44,13 +44,14 @@ export default function AirdropDetail() {
               target="_blank"
               rel="noopener noreferrer"
               className="underline"
+              title="View sender on Solscan"
             >
               {metadata.sender.slice(0, 4)}...{metadata.sender.slice(-4)}
             </a>
           </div>
         </div>
         <div className="mt-4 md:mt-0 flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(window.location.href)}>
+          <Button variant="outline" size="sm" onClick={() => copyToClipboard(window.location.href)}>
             Copy link
           </Button>
         </div>

@@ -41,8 +41,10 @@ export const ClaimStatus = ({ airdrop, tokenInfo }: { airdrop: IAirdrop; tokenIn
     airdrop.distributor.unlockPeriod,
   );
 
-  const claimable =
-    claimStatus?.status === ClaimStatusType.OPEN ? vested.sub(new BN(claimStatus.data.lockedAmountWithdrawn)) : vested;
+  const claimable = useMemo(() => {
+    if (!claimStatus || claimStatus.status !== ClaimStatusType.OPEN) return vested;
+    return BN.max(vested.sub(new BN(claimStatus.data.lockedAmountWithdrawn)), new BN(0));
+  }, [claimStatus, vested]);
 
   if (!connected || !userPubKey)
     return <div className="mt-10 text-center text-lg font-medium">Connect your wallet to view airdrop details.</div>;
